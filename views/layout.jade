@@ -1,0 +1,13 @@
+!!!
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css', media='all')
+    script(type='text/javascript', src="http://use.typekit.com/apf1hll.js")
+  body
+    !=partial('header')
+    #content!= body
+
+    :javascript
+      | try{ Typekit.load(); } catch(e) {}
+  

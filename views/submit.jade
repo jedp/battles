@@ -1,0 +1,14 @@
+form(method='POST')
+
+  - if (newname)
+    p <b>#{newname}</b> joins the battle.
+    p Tell us another awesome name.
+  - else
+    p Tell us your awesome band name.  
+
+  p May it be worthy in battle.
+  input(type="text", id="input", name="name", autofocus)
+
+:javascript
+  | document.getElementById('input').focus();
+

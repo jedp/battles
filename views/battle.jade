@@ -1,0 +1,16 @@
+#battle
+  p Which is more awesome? 
+  form(method='POST')
+    input(type='hidden', name='hash', value=hash)
+    input(type='hidden', name='a_id', value=first_id)
+    input(type='hidden', name='a_votes', value=first_votes)
+    input(type='hidden', name='b_id', value=second_id)
+    input(type='hidden', name='b_votes', value=second_votes)
+    p 
+      input(type='submit', class='awesome', name='vote', value=first_name) 
+    p
+      i or
+    p 
+      input(type='submit', class='awesome', name='vote', value=second_name) 
+
+  

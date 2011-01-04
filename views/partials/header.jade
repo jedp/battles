@@ -1,0 +1,15 @@
+#banner
+  h1= title
+
+#links
+  ul
+  - var links = ['battle', 'stats', 'submit']
+  - for (var i in links)
+    - if (links[i]==here)
+      li
+        span= here
+    - else
+      li
+        a(href='/'+links[i])= links[i]
+
+
