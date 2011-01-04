@@ -57,6 +57,7 @@ var Bandname = db.model('Bandname');
 app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
+  app.use(express.logger({format: ':url :method :response-timems :status HTTP:http-version :remote-addr :date'}));
   app.use(express.bodyDecoder());
   app.use(express.methodOverride());
   app.use(app.router);
