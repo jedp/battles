@@ -57,6 +57,7 @@ table {
    ---------------------------------------------------------------------- */
 
 body {
+    overflow: hidden;
   background-color: #222;
   color: #fff;
   font-family: "anivers-1","anivers-2",sans-serif;
@@ -107,10 +108,11 @@ body {
 }
 
 #battle {
+    display: none;
     text-align: center;
 }
 
-input {
+button {
     font-family: "anivers-1","anivers-2",sans-serif;
     font-weight: 700;
     font-size: 32px;
@@ -122,7 +124,7 @@ input {
     -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.8); 
 }
 
-input.awesome {
+button.awesome {
     background: #222 url(/images/overlay.png) repeat-x; 
     color: #000;
     background-color: #f11;
@@ -130,7 +132,7 @@ input.awesome {
     position: relative;
     cursor: pointer
 }
-input.awesome:hover { 
+button.awesome:hover { 
     background-color: #f44;
 }
 
@@ -148,8 +150,15 @@ b {
 .awesome { color: #f11; }
 .crap { color: #666; }
 
-@media screen and (max-width: 480px) {
-  #banner { padding: 4px; }
-  #links { padding: 4px; }
-  #content { padding: 4px; }
+@media all and (max-width: 640px) {
+    /* iphone4 */
+    body { font-size: 58px; }
+    #banner { padding: 4px 40px; }
+    #links { padding: 4px 40px; }
+    #content {
+        font-size: 1.2em;
+        padding: 62px 40px;
+        width: 12em;
+    }
 }
+
