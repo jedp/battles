@@ -3,11 +3,13 @@ html
   head
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css', media='all')
-    script(type='text/javascript', src="http://use.typekit.com/apf1hll.js")
+    script(type='text/javascript', src="/javascripts/head.js")
     :javascript
-      | try{ Typekit.load(); } catch(e) {}
+      | // script(type='text/javascript', src="http://use.typekit.com/apf1hll.js")
+      | // try{ Typekit.load(); } catch(e) {}
   body
     !=partial('header')
     #content!= body
+
 
   

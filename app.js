@@ -74,71 +74,70 @@ app.configure('production', function(){
 
 // Routes
 
-app.get('/battle', function(req, res){
+makeSecureHash = function(first, second) {
+    return (new crypto.Hash("md5"))
+        .update(secret)
+        .update(JSON.stringify(first._id))
+        .update(JSON.stringify(second._id))
+        .update(first.votes)
+        .update(second.votes).digest("hex");
+};
+
+getTwoCandidates = function(callback) {
+    var self = this;
     var first, second;
     Bandname.getRandom().one(function(result) {
         first = result;
         Bandname.getRandom(first).one(function(result) {
             second = result;
-            var first_id = new ObjectID(first._id).id.toHexString();
-            var second_id = new ObjectID(second._id).id.toHexString();
-            var hash = (new crypto.Hash("md5"))
-                .update(secret)
-                .update(first_id)
-                .update(second_id)
-                .update(first.votes)
-                .update(second.votes).digest("hex");
-            res.render('battle', {
-                locals: {
-                    title: 'Band Name Battles!',
-                    first_name: first.name,
-                    first_id: first_id,
-                    first_votes: first.votes,
-                    second_name: second.name,
-                    second_id: second_id,
-                    second_votes: second.votes,
-                    hash: hash, 
-                    here: 'battle'
-                }
-            });
+
+            var results = {
+                    first: first,
+                    second: second,
+                    secure_hash: makeSecureHash(first, second)
+            };
+            callback(results);
         });
+    });
+};
+
+app.get('/battle', function(req, res) {
+    getTwoCandidates(function(locals) {
+        locals.title = "Band Name Battles!";
+        locals.here = 'battle'
+        res.render('battle', {locals: locals});
     });
 });
 
-app.post('/battle', function(req, res) {
-    // a vote for a band
-    // to prevent cheating, we make sure the hashes work out right 
-    var hash = req.param('hash');
-    var a_id = req.param('a_id');
-    var b_id = req.param('b_id');
-    var a_votes = req.param('a_votes');
-    var b_votes = req.param('b_votes');
+app.post('/vote', function(req, res) {
+    // assume json body; return json response
+    // containing two more candidates to vote for
+    var params = req.body;
 
-    // make sure there's been no tampering with the votes ...
-    var check_hash = (new crypto.Hash("md5"))
-        .update(secret)
-        .update(a_id)
-        .update(b_id)
-        .update(a_votes)
-        .update(b_votes).digest("hex");
-    if (hash != check_hash) {
-        // Naughty!  Tinkering with the hash
-            res.render('naughty');
+    // make sure there's been no tinkering with the hashes
+    if (params.secure_hash != makeSecureHash(params.first, params.second)) {
+            res.send(401);
         } else {
-        // vote for me!
-        Bandname.find({name: req.param('vote')}).one(function(candidate) {
-            if (candidate._id != ObjectID.createFromHexString(a_id).id &&
-                candidate._id != ObjectID.createFromHexString(b_id).id ) {
-                // Naughty! Someone trying to vote for a different band name
-                // from the ones actually given.
-                res.render('naughty');
+
+        Bandname.findById(params.choice).one(function(candidate) {
+            // make sure they're not replaying the same vote
+            // @@@
+
+            // make sure they're voting for one of the options given
+            if (candidate._id.toHexString() != params.first._id &&
+                candidate._id.toHexString() != params.second._id ) {
+                res.send(401);
             } else {
                 candidate.votes += 1;
                 candidate.save();
-                res.redirect("/battle");
             }
         });
     } 
+    getTwoCandidates(function(candidates) {
+        res.send(JSON.stringify(candidates),
+                 {'Content-Type': 'text/plain'},
+                 200);
+    });
 });
 
 app.get('/submit', function(req, res) {
@@ -150,6 +149,7 @@ app.get('/submit', function(req, res) {
         }
     });
 });
+
 app.post('/submit', function(req, res) { 
     var bandname = new Bandname();
     bandname.name = req.param('name');

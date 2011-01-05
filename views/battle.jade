@@ -1,16 +1,23 @@
 #battle
   p Which is more awesome? 
-  form(method='POST')
-    input(type='hidden', name='hash', value=hash)
-    input(type='hidden', name='a_id', value=first_id)
-    input(type='hidden', name='a_votes', value=first_votes)
-    input(type='hidden', name='b_id', value=second_id)
-    input(type='hidden', name='b_votes', value=second_votes)
-    p 
-      input(type='submit', class='awesome', name='vote', value=first_name) 
-    p
-      i or
-    p 
-      input(type='submit', class='awesome', name='vote', value=second_name) 
+  - var first_hex_id = first._id.toHexString();
+  - var second_hex_id = second._id.toHexString();
+  input(type='hidden', id='secure_hash', name='secure_hash', value=secure_hash)
+  input(type='hidden', id='first_id', name='first_id', value=first_hex_id)
+  input(type='hidden', id='first_votes', name='first_votes', value=first.votes)
+  input(type='hidden', id='second_id', name='second_id', value=second_hex_id)
+  input(type='hidden', id='second_votes', name='second_votes', value=second.votes)
+  
+  p 
+    button(class='awesome', id='vote_for_first')= first.name
+  p
+    i or
+  p 
+    button(class='awesome', id='vote_for_second')= second.name
+
+:javascript
+  | head.js({jquery: "https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"},
+  |         {battle: "/javascripts/battle.js"});
+  | head(function() { battles.Battle().wage(); });
 
   
