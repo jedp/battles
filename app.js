@@ -1,13 +1,13 @@
+// eval config
+var fs = require('fs');
+eval(fs.readFileSync('config.js', "ascii"));
+
 var express = require('express');
 var mongoose = require('mongoose/').Mongoose;
 var ObjectID = require('mongodb/bson/bson').ObjectID;
 var crypto = require('crypto');
 
 var app = module.exports = express.createServer();
-
-// secret is used to hash form values with other data to prevent cheating
-var secret = "Attack at Dawn!!!";
-
 
 // ----------------------------------------------------------------------
 // bandnames database
@@ -76,7 +76,7 @@ app.configure('production', function(){
 
 makeSecureHash = function(first, second) {
     return (new crypto.Hash("md5"))
-        .update(secret)
+        .update(settings.secret)
         .update(JSON.stringify(first._id))
         .update(JSON.stringify(second._id))
         .update(first.votes)
@@ -194,6 +194,6 @@ app.get('/', function(req, res) {
 // Only listen on $ node app.js
 
 if (!module.parent) {
-  app.listen(3000);
+  app.listen(settings.port);
   console.log("Express server listening on port %d", app.address().port)
 }

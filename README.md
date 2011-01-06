@@ -6,7 +6,10 @@ This is really a hello-world app for me to learn `node.js`, `mongoDB` and
 
 Thanks in advance for comments or critiques.
 
+Configuration
+-------------
 
+copy `config.js.dist` to `config.js` and edit the file as appropriate.
 
 
 

@@ -1,0 +1,4 @@
+settings = {
+    secret: "Change me to something super-secret and unique",
+    port: 3000
+}
