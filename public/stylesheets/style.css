@@ -112,7 +112,7 @@ body {
     text-align: center;
 }
 
-button {
+input, button {
     font-family: "anivers-1","anivers-2",sans-serif;
     font-weight: 700;
     font-size: 1em;
