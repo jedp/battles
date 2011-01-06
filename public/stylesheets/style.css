@@ -71,7 +71,7 @@ body {
     background-color: #f11;
     padding: 4px 120px;
     color: #000;
-    height: 74px;
+    height: 2.2em;
 }
 
 #banner h1 {
@@ -84,7 +84,7 @@ body {
     background-color: #000;
     font-family: "metalista-web-1","metalista-web-2",sans-serif;
     font-size: 0.9;
-    height: 28px;
+    height: 1em;
     padding: 4px 120px;
 }
 #links ul {
@@ -150,7 +150,7 @@ b {
 .awesome { color: #f11; }
 .crap { color: #666; }
 
-@media all and (max-width: 640px) {
+@media all and (-webkit-min-device-pixel-ratio:2) {
     /* iphone4 */
     body { font-size: 58px; }
     #banner { padding: 4px 40px; }
