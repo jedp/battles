@@ -137,7 +137,7 @@ button.awesome:hover {
 }
 
 p { 
-    margin-bottom: 20px;
+    margin-bottom: .6em;
 }
 p.small {
     font-size: .8em;
