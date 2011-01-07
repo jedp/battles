@@ -104,7 +104,8 @@ getTwoCandidates = function(callback) {
 app.get('/battle', function(req, res) {
     getTwoCandidates(function(locals) {
         locals.title = "Band Name Battles!";
-        locals.here = 'battle'
+        locals.here = 'battle';
+        locals.settings = settings;
         res.render('battle', {locals: locals});
     });
 });
@@ -143,6 +144,7 @@ app.post('/vote', function(req, res) {
 app.get('/submit', function(req, res) {
     res.render('submit',  {
         locals: {
+            settings: settings,
             title: 'Awesome Band Name?',
             newname: null,
             here: 'submit'
@@ -175,6 +177,7 @@ app.get('/stats', function(req, res) {
         worst_votes = result.votes;
         res.render('stats', {
             locals: {
+                settings: settings,
                 title: "Band Name Battles!",
                 best_name: best_name,
                 best_votes: best_votes,
