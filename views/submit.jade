@@ -1,7 +1,9 @@
 #battle
   form(method='POST')
 
-    - if (newname)
+    - if (typeof message != 'undefined')
+      p= message
+    - if (typeof newname != 'undefined')
       p <b>#{newname}</b> joins the battle.
       p Tell us another awesome name.
     - else

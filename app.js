@@ -9,29 +9,99 @@ var crypto = require('crypto');
 
 var app = module.exports = express.createServer();
 
+const NOT_NEW = "Already a band by that name.";
+
 // ----------------------------------------------------------------------
 // bandnames database
 
+var db = mongoose.connect('mongodb://localhost/bandname');
+
 mongoose.model('Bandname', {
-    properties: ['name', 'updated_at', 'random', 'votes'],
+    properties: ['name', 'slug', 'updated_at', 'random', 'votes'],
 
     cast: {
         votes: Number,
         name: String
     },
 
-    indexes: ['random'],
+    indexes: ['random', 'name', 'slug'],
 
     methods: {
-        save: function(f) {
+        isUnique: function(success, error) {
+            var self = this;
+            Bandname.find({_id: {$ne: self._id}, name: self.name}).all(
+                function(results) {
+                    results.length && error(NOT_NEW) || success();
+                }
+            );
+        },    
+
+        voteFor: function(success, error) {
+            this.votes += 1;
+            this.save(success, error);
+        },
+
+        makeSlug: function(success, error, nextslug) {
+            var self = this;
+            slug = self.name.replace(/['"]/g, '').replace(/\W+/g, '-').toLowerCase();
+
+            if (typeof nextslug != 'undefined') {
+                slug += '-' + nextslug;
+                self._nextslug = nextslug + 1;
+            } else { 
+                self._nextslug = 1;
+            }
+
+            self.slug = slug;
+
+            return Bandname.find({_id:{$ne:self._id}, slug: self.slug}).all(function(results) {
+                if (results.length) {
+                    // already a document with this slug
+                    // so try again by incrementing the suffix
+                    self.makeSlug(success, error, self._nextslug);
+                } else {
+                    success();
+                }
+            });
+        },
+
+        save: function(success, error) {
+            var self = this;
+
+            // always reset the random parameter when saving to 
+            // keep randomizing the order and, more importantly, 
+            // the distance between elements in the set
             this.random = Math.random();
             this.updated_at = new Date();
-            this.__super__(f);
+
+            if ( this.isNew ) {
+                // trim extra whitespace on new names
+                self.name = this.name.replace(/\s+/g, ' ').trim();
+                self.votes = 1;
+
+                // now see if it's really unique
+                return this.isUnique( 
+                    function() { 
+                        self.makeSlug( function() { 
+                            // the name is unique, and we have made a unique slug for it
+                            // all is good and well
+                            self.__super__(success) 
+                        })
+                    },
+                    function(why) {
+                        // error - not a unique name
+                        error(why);
+                    }
+                );
+            } else {
+                // bandname isn't new - we're just saving regularly
+                self.__super__(success);
+            }
         }
     },
 
     static: {
-        getRandom: function(other_than_this) {
+        findRandom: function(other_than_this) {
             // find entries in a random order.
             // If provided, exclude `other_than_this` from the result set.
             rand = Math.random();
@@ -49,7 +119,6 @@ mongoose.model('Bandname', {
     }
 });
 
-var db = mongoose.connect('mongodb://localhost/bandname');
 var Bandname = db.model('Bandname');
 
 // Configuration
@@ -57,6 +126,11 @@ var Bandname = db.model('Bandname');
 app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
+
+  // support for sessions
+  app.use(express.cookieDecoder());
+  app.use(express.session());
+
   app.use(express.logger({format: ':url :method :response-timems :status HTTP:http-version :remote-addr :date'}));
   app.use(express.bodyDecoder());
   app.use(express.methodOverride());
@@ -83,30 +157,60 @@ makeSecureHash = function(first, second) {
         .update(second.votes).digest("hex");
 };
 
-getTwoCandidates = function(callback) {
-    var self = this;
-    var first, second;
-    Bandname.getRandom().one(function(result) {
-        first = result;
-        Bandname.getRandom(first).one(function(result) {
-            second = result;
 
-            var results = {
-                    first: first,
-                    second: second,
-                    secure_hash: makeSecureHash(first, second)
-            };
-            callback(results);
-        });
+getCandidate = function(callback, not_this_one) {
+    Bandname.findRandom(not_this_one).one(function(result) {
+        callback(result);
     });
 };
 
+maybeSwitchCandidates = function(session, candidate, callback) {
+    if (session.favorite) {
+        if (session.favorite.id == candidate._id.toHexString()) {
+            if (session.favorite.votes > settings.max_consecutive_votes) {
+                // too many votes for the same candidate
+                getCandidate(callback, candidate);
+                return;
+            }
+            // increment vote
+            session.favorite.votes += 1;
+        } else {
+            // change vote
+            session.favorite = {'id': candidate._id.toHexString(), 'votes': 1};
+        }
+    } else {
+        // init session data
+        session.favorite = {'id': candidate._id.toHexString(), 'votes': 1};
+    }
+    callback(candidate);
+};
+
+renderGetBattle = function(req, res, first, second) {
+    res.render('battle', {
+        locals: {
+            title: "Band Name Battles!",
+            here: 'batte',
+            settings: settings,
+            first: first,
+            second: second,
+            secure_hash: makeSecureHash(first, second)
+        }
+    });
+};
 app.get('/battle', function(req, res) {
-    getTwoCandidates(function(locals) {
-        locals.title = "Band Name Battles!";
-        locals.here = 'battle';
-        locals.settings = settings;
-        res.render('battle', {locals: locals});
+    getCandidate(function(first){
+        getCandidate(function(second, req){
+            renderGetBattle(req, res, first, second);
+            }, 
+        first);
+    });
+});
+
+app.get('/battle/:slug', function(req, res) {
+    Bandname.find({slug: req.params.slug}).first(function(first){
+        getCandidate(function(second) {
+            renderGetBattle(req, res, first, second);
+        }, first);
     });
 });
 
@@ -129,16 +233,30 @@ app.post('/vote', function(req, res) {
                 candidate._id.toHexString() != params.second._id ) {
                 res.send(401);
             } else {
-                candidate.votes += 1;
-                candidate.save();
+                candidate.voteFor(
+                    function() { // vote succeeded
+                        maybeSwitchCandidates(req.session, candidate, function(candidate) {
+                            getCandidate( function(another) {
+                                    res.send(
+                                        JSON.stringify({
+                                            first:candidate,
+                                            second:another,
+                                            secure_hash:makeSecureHash(candidate, another)
+                                            }),
+                                        {'Content-Type': 'text/plain'},
+                                        200);
+                                    }, 
+                                // pick a candidate other than this one
+                                candidate);
+                            });
+                        }, 
+                    function(why) { // voteFor failed!
+                        res.render('error', { 
+                            locals: { title: "No vote for you", errstr: why }} );
+                    });
             }
         });
     } 
-    getTwoCandidates(function(candidates) {
-        res.send(JSON.stringify(candidates),
-                 {'Content-Type': 'text/plain'},
-                 200);
-    });
 });
 
 app.get('/submit', function(req, res) {
@@ -146,7 +264,6 @@ app.get('/submit', function(req, res) {
         locals: {
             settings: settings,
             title: 'Awesome Band Name?',
-            newname: null,
             here: 'submit'
         }
     });
@@ -155,34 +272,45 @@ app.get('/submit', function(req, res) {
 app.post('/submit', function(req, res) { 
     var bandname = new Bandname();
     bandname.name = req.param('name');
-    bandname.votes = 0;
-    bandname.save();
-    res.render('submit', {
-        locals: { 
-            title: 'Awesome Band Name?',
-            newname: bandname.name,
-            here: 'submit'
+    bandname.save(
+        function() {
+            // battle the new bandname
+            res.redirect('/battle/'+bandname.slug);
+        },
+        function(why) {
+            if (why == NOT_NEW) {
+                res.render('submit', {
+                    locals: {
+                        title: 'Awesome Band Name?',
+                        message: why,
+                        here: 'submit'
+                    }
+                });
+            } else {
+                res.render('error', {
+                    locals: { title: "No band name for you", errstr: why }});
+            }    
         }
-    });
+    );
 });
 
 
 app.get('/stats', function(req, res) {
-    var best_name = worst_name = "???";
-    Bandname.find().sort([['votes', 'descending']]).first(function(result) {
-        best_name = result.name;
-        best_votes = result.votes;
-    }).last(function(result) {
-        worst_name = result.name;
-        worst_votes = result.votes;
+    Bandname.find().sort([['votes', 'descending']]).all(function(results) {
+        var total = results.length
+        var slice = Math.min(settings.stats_length, total-1);
+        var best = [];
+        for (var i=0; i<slice; i++) {
+            best.push(results[i]);
+        }
+        worst = results[results.length-1];
         res.render('stats', {
             locals: {
                 settings: settings,
-                title: "Band Name Battles!",
-                best_name: best_name,
-                best_votes: best_votes,
-                worst_name: worst_name,
-                worst_votes: worst_votes,
+                title: "Best of " + total + " contenders",
+                best: best,
+                worst: worst,
+                total: total,
                 here: 'stats'
             }
         });

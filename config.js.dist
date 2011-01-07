@@ -2,6 +2,10 @@ settings = {
     secret: "Change me to something super-secret and unique",
     port: 3000,
 
+    // max number of times you can vote for the same band
+    // can't just sit there and click on it all day!
+    max_consecutive_votes: 5,
+
     auth: {
 
         // for facebook connectivity, fill these in:

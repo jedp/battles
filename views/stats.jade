@@ -1,16 +1,21 @@
-#battle
-  p.small 
-    i Best band name (#{best_votes} votes)
+#stats
 
   p
-    b.awesome #{best_name}
+    ul
+      - for (var i in best)
+        li
+          b.awesome
+            a(href='/battle/'+best[i].slug) #{best[i].name} 
+            span.dim (#{best[i].votes})
+
 
   p &nbsp;
     
-
-  p.small 
-    i Worst band name (#{worst_votes} votes)
+  p
+    i.red Worst ever
 
   p
-    b.crap #{worst_name}
+    b.crap 
+      a(href='/battle/'+worst.slug) #{worst.name} 
+      span.dim (#{worst.votes})
 
