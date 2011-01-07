@@ -27,8 +27,8 @@ html
     |    console.log("check fb login");
     |    console.log(FB.getLoginStatus);
     |    FB.getLoginStatus(function(response) {
-    |      if (reponse.session) {
-    |        console.log("logged into fb:", repsonse.session);
+    |      if (response.session) {
+    |        console.log("logged into fb:", response.session);
     |      } else { console.log("not logged into fb"); }
     |    });
     | });
