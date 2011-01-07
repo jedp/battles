@@ -16,8 +16,9 @@
     button(class='awesome', id='vote_for_second')= second.name
 
 :javascript
-  | head.js({jquery: "https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"},
-  |         {battle: "/javascripts/battle.js"});
-  | head(function() { battles.Battle().wage(); });
+  | head(function() {
+  |    $('#battle').fadeIn();
+  |    battles.Battle().wage(); 
+  | });
 
   

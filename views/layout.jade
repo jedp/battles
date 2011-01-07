@@ -7,9 +7,32 @@ html
     script(type='text/javascript', src="/javascripts/head.js")
     :javascript
       | try{ Typekit.load(); } catch(e) {}
+      
   body
     !=partial('header')
     #content!= body
+
+    #fb-root
+
+  :javascript
+    | head.js({jquery: "https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"},
+    |         {fb: "http://connect.facebook.net/en_US/all.js"},
+    |         {battle: "/javascripts/battle.js"});
+    | head(function() { 
+    |    FB.init({appId: #{settings.auth.facebook.app_id},
+    |             status: true,
+    |             cookie: true,
+    |             xfbml: true
+    |    });
+    |    console.log("check fb login");
+    |    console.log(FB.getLoginStatus);
+    |    FB.getLoginStatus(function(response) {
+    |      if (reponse.session) {
+    |        console.log("logged into fb:", repsonse.session);
+    |      } else { console.log("not logged into fb"); }
+    |    });
+    | });
+    
 
 
   
