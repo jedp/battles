@@ -98,9 +98,6 @@ body {
     text-decoration: none;
     color: #fff;
 }
-#links span {
-    color: #f11;
-}
 
 #content {
     padding: 4px 120px;
@@ -121,6 +118,11 @@ body {
 #stats a {
     text-decoration: none;
     color: #fff;
+}
+
+#links a:hover,
+#stats a:hover {
+    color: #f11;
 }
 
 input, button {

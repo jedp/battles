@@ -5,9 +5,10 @@
       - for (var i in best)
         li
           b.awesome
-            a(href='/battle/'+best[i].slug) #{best[i].name} 
-            span.dim (#{best[i].votes})
-
+            a(href='/battle/'+best[i].slug) #{best[i].name}  
+            - if (i == 0)
+              span.red &#x2605  
+              span.dim #{best[i].popularity}% love
 
   p &nbsp;
     
@@ -16,6 +17,6 @@
 
   p
     b.crap 
-      a(href='/battle/'+worst.slug) #{worst.name} 
-      span.dim (#{worst.votes})
+      a(href='/battle/'+worst.slug) #{worst.name}   
+      span.dim #{100 - worst.popularity}% hate
 
