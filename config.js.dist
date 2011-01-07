@@ -1,4 +1,14 @@
 settings = {
     secret: "Change me to something super-secret and unique",
-    port: 3000
+    port: 3000,
+
+    auth: {
+
+        // for facebook connectivity, fill these in:
+        facebook: {
+            app_id: 0,
+            api_key: "",
+            app_secret: "",
+        }
+    }
 }
