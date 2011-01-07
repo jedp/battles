@@ -5,7 +5,7 @@
   ul
   - var links = ['battle', 'stats', 'submit']
   - for (var i in links)
-    - if (links[i]==here)
+    - if (typeof here !== 'undefined' && links[i]==here)
       li
         span= here
     - else
