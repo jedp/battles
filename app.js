@@ -17,14 +17,28 @@ const NOT_NEW = "Already a band by that name.";
 var db = mongoose.connect('mongodb://localhost/bandname');
 
 mongoose.model('Bandname', {
-    properties: ['name', 'slug', 'updated_at', 'random', 'votes'],
+    properties: ['name', 'slug', 'updated_at', 'random', 'votes', 'rejects', 'popularity'],
 
     cast: {
         votes: Number,
-        name: String
+        rejects: Number,
+        totalVotes: Number,
+        slug: String,
+        name: String, 
+        popularity: String,
     },
 
     indexes: ['random', 'name', 'slug'],
+
+    getters: {
+        popularity: function() {
+            // normalized popularity
+            return (this.votes / (this.votes+this.rejects)).toFixed(2) * 100 
+        },
+        totalVotes: function() {
+            return this.votes + this.rejects
+        }
+    }, 
 
     methods: {
         isUnique: function(success, error) {
@@ -38,6 +52,11 @@ mongoose.model('Bandname', {
 
         voteFor: function(success, error) {
             this.votes += 1;
+            this.save(success, error);
+        },
+
+        voteAgainst: function(success, error) {
+            this.rejects += 1;
             this.save(success, error);
         },
 
@@ -189,7 +208,7 @@ renderGetBattle = function(req, res, first, second) {
     res.render('battle', {
         locals: {
             title: "Band Name Battles!",
-            here: 'batte',
+            here: 'battle',
             settings: settings,
             first: first,
             second: second,
@@ -229,10 +248,21 @@ app.post('/vote', function(req, res) {
             // @@@
 
             // make sure they're voting for one of the options given
-            if (candidate._id.toHexString() != params.first._id &&
-                candidate._id.toHexString() != params.second._id ) {
+            candidate_id = candidate._id.toHexString();
+            if (candidate_id != params.first._id && candidate_id != params.second._id ) {
                 res.send(401);
             } else {
+                // reject the one candidate, 
+                // vote for the other
+                if (candidate_id == params.first._id) {
+                    other_id = params.second._id;
+                } else {
+                    other_id = params.first._id;
+                }
+                Bandname.findById(other_id).one(function(other){
+                    other.voteAgainst();
+                });
+
                 candidate.voteFor(
                     function() { // vote succeeded
                         maybeSwitchCandidates(req.session, candidate, function(candidate) {
