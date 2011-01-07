@@ -103,13 +103,24 @@ body {
 }
 
 #content {
-    padding: 60px 120px;
+    padding: 4px 120px;
     width: 460px;
+    text-align: center;
 }
 
 #battle {
+    padding: 60px 0px;
     display: none;
-    text-align: center;
+}
+
+#stats {
+    padding: 0;
+    font-size: .8em;
+}
+
+#stats a {
+    text-decoration: none;
+    color: #fff;
 }
 
 input, button {
@@ -139,9 +150,6 @@ button.awesome:hover {
 p { 
     margin-bottom: .6em;
 }
-p.small {
-    font-size: .8em;
-}
 
 b {
   font-weight: 700;
@@ -149,15 +157,18 @@ b {
 
 .awesome { color: #f11; }
 .crap { color: #666; }
+.dim { color: #666; }
+.red { color: #f11; }
 
 @media all and (-webkit-min-device-pixel-ratio:2) {
     /* iphone4 */
     body { font-size: 58px; }
     #banner { padding: 4px 40px; }
     #links { padding: 4px 40px; }
+    #battle { padding: 60px 0px; }
     #content {
         font-size: 1.2em;
-        padding: 62px 40px;
+        padding: 4px 40px;
         width: 12em;
     }
 }
