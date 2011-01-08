@@ -337,7 +337,7 @@ app.get('/stats', function(req, res) {
         res.render('stats', {
             locals: {
                 settings: settings,
-                title: "Best of " + total + " contenders",
+                title: "Best of " + total + " names",
                 best: best,
                 worst: worst,
                 total: total,
