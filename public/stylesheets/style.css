@@ -57,13 +57,13 @@ table {
    ---------------------------------------------------------------------- */
 
 body {
-    overflow: hidden;
-  background-color: #222;
-  color: #fff;
-  font-family: "anivers-1","anivers-2",sans-serif;
-  font-size: 32px;
-  font-weight: 400;
-  font-style: normal;
+    overflow: auto;
+    background-color: #222;
+    color: #fff;
+    font-family: "anivers-1","anivers-2",sans-serif;
+    font-size: 32px;
+    font-weight: 400;
+    font-style: normal;
 }
 
 #banner {
@@ -112,6 +112,7 @@ body {
 
 #stats {
     padding: 0;
+    line-height: 1.1em;
     font-size: .8em;
 }
 
@@ -164,7 +165,10 @@ b {
 
 @media all and (-webkit-min-device-pixel-ratio:2) {
     /* iphone4 */
-    body { font-size: 58px; }
+    body { 
+        overflow: hidden;
+        font-size: 58px; 
+    }
     #banner { padding: 4px 40px; }
     #links { padding: 4px 40px; }
     #battle { padding: 60px 0px; }

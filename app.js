@@ -62,7 +62,7 @@ mongoose.model('Bandname', {
 
         makeSlug: function(success, error, nextslug) {
             var self = this;
-            slug = self.name.replace(/['"]/g, '').replace(/\W+/g, '-').toLowerCase();
+            slug = self.name.replace(/['"]/g, '').replace(/\s+/g, '-').toLowerCase();
 
             if (typeof nextslug != 'undefined') {
                 slug += '-' + nextslug;
@@ -227,9 +227,17 @@ app.get('/battle', function(req, res) {
 
 app.get('/battle/:slug', function(req, res) {
     Bandname.find({slug: req.params.slug}).first(function(first){
-        getCandidate(function(second) {
-            renderGetBattle(req, res, first, second);
-        }, first);
+        if (first) {
+            getCandidate(function(second) {
+                renderGetBattle(req, res, first, second);
+            }, first);
+        } else {
+            res.render('error', {
+                locals: {
+                    title: "404",
+                    errstr: "That doesn't go anywhere"
+                }});
+        }
     });
 });
 
